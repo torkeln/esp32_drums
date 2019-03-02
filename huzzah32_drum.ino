@@ -50,14 +50,13 @@ void setup() {
   delay(500);
   Serial.begin(2000000);
   i2s_setup();
-  FastLED.addLeds<WS2811, LED_PIN, RGB>(leds, N_PIXELS);
-
+  led_setup();
   t.every(10, updateLEDS, NULL);
   //t.every(10, printData, NULL);
 
   setup_wifi();
   client.setServer(mqtt_server, 1883);
-  client.setCallback(callback);
+  client.setCallback(mqtt_callback);
 }
 
 bool use_networking = false;
@@ -99,81 +98,6 @@ void setup_wifi() {
   }
 }
 
-void callback(char* topic, byte* message, unsigned int length) {
-  Serial.print("Message arrived on topic: ");
-  Serial.print(topic);
-  Serial.print(". Message: ");
-  String messageTemp;
-
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)message[i]);
-    messageTemp += (char)message[i];
-  }
-  Serial.println();
-
-  // Changes the output state according to the message
-  if (String(topic) == "led/color") {
-    if (messageTemp.equals("lava"))
-    {
-      currentPalette = LavaColors_p;
-    }
-    else if (messageTemp.equals("ocean"))
-    {
-      currentPalette = OceanColors_p;
-    }
-    else if (messageTemp.equals("rainbow"))
-    {
-      currentPalette = RainbowColors_p;
-    }
-    else if (messageTemp.equals("cloud"))
-    {
-      currentPalette = CloudColors_p;
-    }
-    else if (messageTemp.equals("forest"))
-    {
-      currentPalette = ForestColors_p;
-    }
-    else if (messageTemp.equals("rainbowstripe"))
-    {
-      currentPalette = RainbowStripeColors_p;
-    }
-    else if (messageTemp.equals("party"))
-    {
-      currentPalette = PartyColors_p;
-    }
-    else if (messageTemp.equals("heat"))
-    {
-      currentPalette = HeatColors_p;
-    }
-    else if (messageTemp.equals("blue"))
-    {
-      currentPalette = blue_gp;
-    }
-    else if (messageTemp.equals("red"))
-    {
-      currentPalette = red_gp;
-    }
-    else if (messageTemp.equals("green"))
-    {
-      currentPalette = green_gp;
-    }
-    else
-    {
-      Serial.println(messageTemp);
-    }
-  }
-  else if (String(topic) == "led/mode") {
-    if (messageTemp.equals("audio"))
-    {
-      mode = AUDIO;
-    }
-    else if (messageTemp.equals("run"))
-    {
-      mode = RUN;
-    }
-  }
-}
-
 
 void reconnect() {
   // Loop until we're reconnected
@@ -197,40 +121,6 @@ void reconnect() {
   }
 }
 
-void updateLEDS(void * context)
-{
-  static int led_runner = 0;
-  int i;
-  const float threshold = 0.5f;
-  const float inv_threshold = (1.0f-threshold);
-  // Calculate bar height based on dynamic min/max levels (fixed point):
-  float inter = fmax(fmin((rms_fast_t.rms*2.5f-1.0f), 1.0f), 0.0f);
-  Serial.print(rms_fast_t.rms);
-  Serial.print(" ");
-  Serial.print(inter);
-  Serial.println();
-  int height = (int)(inter * TOP);
-  //Serial.println(rms_fast_t.rms);
-  for (i = 0; i < N_PIXELS; i++) {
-    if (mode == AUDIO)
-    {
-      if (i >= height)
-        leds[i] = CRGB::Black;
-      else
-        leds[i] = ColorFromPalette( currentPalette, 255 * i / N_PIXELS, 100, currentBlending);
-    }
-    else if (mode == RUN)
-    {
-      if (i == led_runner)
-        leds[i] = ColorFromPalette( currentPalette, 255 * i / N_PIXELS, 100, currentBlending);
-      else
-        leds[i] = CRGB::Black;
-    }
-  }
-
-  FastLED.show();
-  led_runner = (led_runner + 1) % N_PIXELS;
-}
 
 void loop() {
   t.update();

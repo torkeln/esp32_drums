@@ -1,3 +1,5 @@
+#include <arduinoFFT.h>
+
 /**
    ESP32 I2S VUMeter Example.
 
@@ -76,7 +78,7 @@ float rms_filter(float sample, struct rms_state * state)
 }
 
 #define INITIAL 0.1  /* Initial value of the filter memory. */
-#define SAMPLES (160)
+#define SAMPLES (80)
 struct rms_state rms_fast_t = {INITIAL, SAMPLES, 1UL * SAMPLES * INITIAL * INITIAL};
 
 float samples_mirror[BLOCK_SIZE];
