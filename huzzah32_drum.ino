@@ -9,21 +9,6 @@
 #define LED_PIN    12
 #define TOP       (N_PIXELS +1)
 
-#define INITIAL 1  /* Initial value of the filter memory. */
-#define SAMPLES_FAST (200)
-#define SAMPLES_SLOW (4000000)
-
-
-#define AUDIO_BUFFER_MAX 8000
-
-static uint8_t audioBuffer[AUDIO_BUFFER_MAX];
-static uint8_t transmitBuffer[AUDIO_BUFFER_MAX];
-static uint32_t bufferPointer = 0;
-
-hw_timer_t * timer = NULL; // our timer
-portMUX_TYPE timerMux = portMUX_INITIALIZER_UNLOCKED;
-bool transmitNow = false;
-
 // This is an array of leds.  One item for each led in your strip.
 CRGB leds[N_PIXELS];
 CRGBPalette16 currentPalette = RainbowColors_p;
@@ -63,7 +48,7 @@ PubSubClient client(espClient);
 
 void setup() {
   delay(500);
-  Serial.begin(115200);
+  Serial.begin(2000000);
   i2s_setup();
   FastLED.addLeds<WS2811, LED_PIN, RGB>(leds, N_PIXELS);
 
@@ -219,8 +204,13 @@ void updateLEDS(void * context)
   const float threshold = 0.5f;
   const float inv_threshold = (1.0f-threshold);
   // Calculate bar height based on dynamic min/max levels (fixed point):
-  int height = (int)(fmax(rms_fast_t.rms-threshold,0.0)/inv_threshold * TOP);
-  Serial.println(rms_fast_t.rms);
+  float inter = fmax(fmin((rms_fast_t.rms*2.5f-1.0f), 1.0f), 0.0f);
+  Serial.print(rms_fast_t.rms);
+  Serial.print(" ");
+  Serial.print(inter);
+  Serial.println();
+  int height = (int)(inter * TOP);
+  //Serial.println(rms_fast_t.rms);
   for (i = 0; i < N_PIXELS; i++) {
     if (mode == AUDIO)
     {

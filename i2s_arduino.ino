@@ -13,7 +13,7 @@
 #include "filter1.h"
 
 const i2s_port_t I2S_PORT = I2S_NUM_0;
-const int BLOCK_SIZE = 128;
+const int BLOCK_SIZE = 1024;
 
 filter1Type * f1;
 
@@ -25,7 +25,7 @@ void i2s_setup() {
   // The I2S config as per the example
   const i2s_config_t i2s_config = {
     .mode = i2s_mode_t(I2S_MODE_MASTER | I2S_MODE_RX), // Receive, not transfer
-    .sample_rate = 44100,                         // 64kHz
+    .sample_rate = 16000,
     .bits_per_sample = I2S_BITS_PER_SAMPLE_32BIT, // could only get it to work with 32bits
     .channel_format = I2S_CHANNEL_FMT_ONLY_RIGHT, // although the SEL config should be left, it seems to transmit on right
     .communication_format = i2s_comm_format_t(I2S_COMM_FORMAT_I2S | I2S_COMM_FORMAT_I2S_LSB),
@@ -76,7 +76,7 @@ float rms_filter(float sample, struct rms_state * state)
 }
 
 #define INITIAL 0.1  /* Initial value of the filter memory. */
-#define SAMPLES (441)
+#define SAMPLES (160)
 struct rms_state rms_fast_t = {INITIAL, SAMPLES, 1UL * SAMPLES * INITIAL * INITIAL};
 
 float samples_mirror[BLOCK_SIZE];
@@ -104,13 +104,14 @@ float i2s_loop() {
     float maxval = -2147483648;
     float minval = 2147483648;
     for (int i = 0; i < samples_read; i++) {
-      samples_mirror[i] = samples[i]/2147483648.0f;
+      samples_mirror[i] = samples[i]/3518234624.0f*2.0f;
     }
 
     filter1_filterBlock( f1, samples_mirror, samples_filtered, samples_read );
 
     for (int i = 0; i < samples_read; i++) {
       rms_filter(samples_filtered[i], &rms_fast_t);
+      //Serial.println(samples_filtered[i]);
       
       minval = fmin(minval, samples_filtered[i]);
       maxval = fmax(maxval, samples_filtered[i]);
@@ -118,10 +119,10 @@ float i2s_loop() {
 
     float envelope = (maxval - minval);
     rms_filter(envelope, &rms_fast_t);
-/*    Serial.print(envelope);
-    Serial.print(" ");
-    Serial.print(rms_fast_t.rms);
-    Serial.println();*/
+    //Serial.print(rms_fast_t.rms);
+    /*Serial.print(" ");
+    Serial.print(rms_fast_t.rms);*/
+    //Serial.println();
   }
   return rms_fast_t.rms;
 }
