@@ -14,21 +14,25 @@ void updateLEDS(void * context)
   Serial.println();
 #endif
   int height = (int)(inter * TOP);
-  //Serial.println(rms_fast_t.rms);
+
   for (i = 0; i < N_PIXELS; i++) {
-    if (mode == AUDIO)
+    if (mode == MODE_AUDIO)
     {
       if (i >= height)
         leds[i] = CRGB::Black;
       else
         leds[i] = ColorFromPalette( currentPalette, 255 * i / N_PIXELS, 100, currentBlending);
     }
-    else if (mode == RUN)
+    else if (mode == MODE_RUN)
     {
       if (i == led_runner)
         leds[i] = ColorFromPalette( currentPalette, 255 * i / N_PIXELS, 100, currentBlending);
       else
         leds[i] = CRGB::Black;
+    }
+    else if (mode == MODE_FFT)
+    {
+      leds[i] = ColorFromPalette(currentPalette, 255 * i / N_PIXELS, min((int)(200 * fft_bins[i]),255), currentBlending);
     }
   }
 

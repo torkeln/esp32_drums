@@ -1,5 +1,3 @@
-#include <arduinoFFT.h>
-
 /**
    ESP32 I2S VUMeter Example.
 
@@ -13,11 +11,13 @@
 #include <driver/i2s.h>
 #include <limits.h>
 #include "filter1.h"
+#include <arduinoFFT.h>
 
 const i2s_port_t I2S_PORT = I2S_NUM_0;
 const int BLOCK_SIZE = 1024;
 
 filter1Type * f1;
+arduinoFFT FFT = arduinoFFT();
 
 void i2s_setup() {
   //Serial.begin(2000000);
@@ -57,7 +57,10 @@ void i2s_setup() {
     while (true);
   }
   Serial.println("I2S driver installed.");
+
+  Serial.println("Create audio filter.");
   f1 = filter1_create();
+
 }
 
 int32_t samples[BLOCK_SIZE];
@@ -84,6 +87,44 @@ struct rms_state rms_fast_t = {INITIAL, SAMPLES, 1UL * SAMPLES * INITIAL * INITI
 float samples_mirror[BLOCK_SIZE];
 float samples_filtered[BLOCK_SIZE];
 
+double vReal[BLOCK_SIZE];
+double vImag[BLOCK_SIZE];
+double fft_bins[60];
+
+void fft_stuff(float * data, size_t size)
+{
+  for (int i = 0; i < size; i++)
+  {
+    vReal[i] = data[i];
+    vImag[i] = 0.0;
+  }
+  for (int i = 0; i < 60; i++)
+  {
+    fft_bins[i] = 0.0;
+  }
+
+  FFT.Windowing(vReal, size, FFT_WIN_TYP_HAMMING, FFT_FORWARD);
+  FFT.Compute(vReal, vImag, size, FFT_FORWARD);
+  FFT.ComplexToMagnitude(vReal, vImag, size);
+
+  const int max_size = size / 4;
+  double fft_data[max_size];
+  memcpy(fft_data, vReal + 2, max_size*sizeof(double));
+
+  for (int i = 0; i < max_size; i++) {
+    int bin = lroundf(60.0f * i / max_size);
+    fft_bins[bin] += fft_data[i];
+  }
+
+#if 0
+  for (int i = 0; i < 60; i++)
+  {
+    Serial.printf("%2.1f ", fft_bins[i]);
+  }
+  Serial.println();
+#endif
+}
+
 float i2s_loop() {
   size_t samples_read = 0;
   // Read multiple samples at once and calculate the sound pressure
@@ -106,15 +147,17 @@ float i2s_loop() {
     float maxval = -2147483648;
     float minval = 2147483648;
     for (int i = 0; i < samples_read; i++) {
-      samples_mirror[i] = samples[i]/3518234624.0f*2.0f;
+      samples_mirror[i] = samples[i] / 3518234624.0f;
     }
 
     filter1_filterBlock( f1, samples_mirror, samples_filtered, samples_read );
+    fft_stuff(samples_mirror, samples_read);
+
 
     for (int i = 0; i < samples_read; i++) {
       rms_filter(samples_filtered[i], &rms_fast_t);
       //Serial.println(samples_filtered[i]);
-      
+
       minval = fmin(minval, samples_filtered[i]);
       maxval = fmax(maxval, samples_filtered[i]);
     }
@@ -123,7 +166,7 @@ float i2s_loop() {
     rms_filter(envelope, &rms_fast_t);
     //Serial.print(rms_fast_t.rms);
     /*Serial.print(" ");
-    Serial.print(rms_fast_t.rms);*/
+      Serial.print(rms_fast_t.rms);*/
     //Serial.println();
   }
   return rms_fast_t.rms;

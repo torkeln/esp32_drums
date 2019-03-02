@@ -64,11 +64,14 @@ void mqtt_callback(char* topic, byte* message, unsigned int length) {
   else if (String(topic) == "led/mode") {
     if (messageTemp.equals("audio"))
     {
-      mode = AUDIO;
+      mode = MODE_AUDIO;
     }
     else if (messageTemp.equals("run"))
     {
-      mode = RUN;
+      mode = MODE_RUN;
     }
-  }
+    else if (messageTemp.equals("fft"))
+    {
+      mode = MODE_FFT;
+    }
 }

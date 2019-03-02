@@ -15,11 +15,12 @@ CRGBPalette16 currentPalette = RainbowColors_p;
 TBlendType    currentBlending = LINEARBLEND;
 
 enum MODE {
-  AUDIO,
-  RUN
+  MODE_AUDIO,
+  MODE_RUN,
+  MODE_FFT
 };
 
-enum MODE mode = RUN;
+enum MODE mode = MODE_RUN;
 
 DEFINE_GRADIENT_PALETTE( blue_gp ) {
   0,     0,  0,  100,
@@ -90,11 +91,11 @@ void setup_wifi() {
 
   if (use_networking)
   {
-    mode = RUN;
+    mode = MODE_RUN;
   }
   else
   {
-    mode = AUDIO;
+    mode = MODE_AUDIO;
   }
 }
 

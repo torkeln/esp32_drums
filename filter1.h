@@ -67,6 +67,3 @@ void filter1_destroy( filter1Type *pObject );
 #ifdef __cplusplus
 } // extern "C"
 #endif
-
-
-	
