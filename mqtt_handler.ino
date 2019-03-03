@@ -74,4 +74,5 @@ void mqtt_callback(char* topic, byte* message, unsigned int length) {
     {
       mode = MODE_FFT;
     }
+  }
 }
