@@ -52,7 +52,7 @@ void setup() {
   Serial.begin(2000000);
   i2s_setup();
   led_setup();
-  t.every(10, updateLEDS, NULL);
+  t.every(50, updateLEDS, NULL);
   //t.every(10, printData, NULL);
 
   setup_wifi();

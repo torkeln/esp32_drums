@@ -75,4 +75,10 @@ void mqtt_callback(char* topic, byte* message, unsigned int length) {
       mode = MODE_FFT;
     }
   }
+  else if (String(topic) == "led/threshold") {
+    rms_threshold = clamp(messageTemp.toFloat(), 1.0f, 0.0f);
+  }
+  else if (String(topic) == "led/multiplier") {
+    rms_multiplier = clamp(messageTemp.toFloat(), 10.0f, 1.0f);
+  }
 }

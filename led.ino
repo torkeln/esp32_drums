@@ -1,3 +1,11 @@
+
+float rms_multiplier = 2.0f;
+float rms_threshold = 0.4f;
+
+float clamp(float val, float maxval, float minval)
+{
+  return fmax(fmin(val, maxval), minval);
+}
 void updateLEDS(void * context)
 {
   static int led_runner = 0;
@@ -5,7 +13,16 @@ void updateLEDS(void * context)
   const float threshold = 0.5f;
   const float inv_threshold = (1.0f - threshold);
   // Calculate bar height based on dynamic min/max levels (fixed point):
-  float inter = fmax(fmin((rms_fast_t.rms * 2.5f - 1.0f), 1.0f), 0.0f);
+  float normalized_level = fmax(fmin(rms_fast_t.rms * 2.0f, 1.0f), 0.0f);
+  float level = rms_multiplier * (normalized_level - rms_threshold);
+  float inter = clamp(level, 1.0f, 0.0f);
+  Serial.print(1.0f);
+  Serial.print(" ");
+  Serial.print(rms_fast_t.rms*2);
+  Serial.print(" ");
+  Serial.print(level);
+  Serial.print(" ");
+  Serial.println(inter);
 
 #ifdef PRINT_LEVEL_LOG
   Serial.print(rms_fast_t.rms);
@@ -21,12 +38,12 @@ void updateLEDS(void * context)
       if (i >= height)
         leds[i] = CRGB::Black;
       else
-        leds[i] = ColorFromPalette( currentPalette, 255 * i / N_PIXELS, 100, currentBlending);
+        leds[i] = ColorFromPalette( currentPalette, 255 * i / N_PIXELS, 255, currentBlending);
     }
     else if (mode == MODE_RUN)
     {
       if (i == led_runner)
-        leds[i] = ColorFromPalette( currentPalette, 255 * i / N_PIXELS, 100, currentBlending);
+        leds[i] = ColorFromPalette( currentPalette, 255 * i / N_PIXELS, 255, currentBlending);
       else
         leds[i] = CRGB::Black;
     }
