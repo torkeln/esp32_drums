@@ -2,38 +2,8 @@
 #include <PubSubClient.h>
 #include <Event.h>
 #include <Timer.h>
-#include <FastLED.h>
 
-#define N_PIXELS  60  // Number of pixels you are using
 #define MIC_PIN   A2
-#define LED_PIN    12
-#define TOP       (N_PIXELS +1)
-
-// This is an array of leds.  One item for each led in your strip.
-CRGB leds[N_PIXELS];
-CRGBPalette16 currentPalette = RainbowColors_p;
-TBlendType    currentBlending = LINEARBLEND;
-
-enum MODE {
-  MODE_AUDIO,
-  MODE_RUN,
-  MODE_FFT
-};
-
-enum MODE mode = MODE_RUN;
-
-DEFINE_GRADIENT_PALETTE( blue_gp ) {
-  0,     0,  0,  100,
-  255,   100,  100,  255
-};
-DEFINE_GRADIENT_PALETTE( green_gp ) {
-  0,     100,  0,  0,
-  255,   255,  100,  100
-};
-DEFINE_GRADIENT_PALETTE( red_gp ) {
-  0,     0,  100,  0,
-  255,   100,  255,  100
-};
 
 // Replace the next variables with your SSID/Password combination
 const char* ssid = "SAMBAND";
