@@ -107,5 +107,5 @@ void led_init() {
         NULL,  /* Task input parameter */
         3 ,  /* Priority of the task */
         NULL,  /* Task handle. */
-        0); /* Core where the task should run */  
+        1); /* Core where the task should run */  
 }
