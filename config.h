@@ -1,8 +1,9 @@
-const int N_PIXELS = 60;  // Number of pixels you are using
+const int N_PIXELS = 300;  // Number of pixels you are using
 const int I2S_BLOCK_SIZE = 1024;
 const float RMS_INITIAL = 0.1f;
 const int RMS_SAMPLES = 80;
 const int LED_PIN = 12;
+#define LED_UPDATE_EVERY_MS (10)
 
 // Replace the next variables with your SSID/Password combination
 const char* ssid = "SAMBAND";

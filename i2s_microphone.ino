@@ -23,7 +23,7 @@ float samples_filtered[I2S_BLOCK_SIZE];
 
 double vReal[I2S_BLOCK_SIZE];
 double vImag[I2S_BLOCK_SIZE];
-double fft_bins[60];
+double fft_bins[N_PIXELS];
 
 void i2s_init() {
   xTaskCreatePinnedToCore(
@@ -96,7 +96,7 @@ void fft_stuff(float * data, size_t size)
     vReal[i] = data[i];
     vImag[i] = 0.0;
   }
-  for (int i = 0; i < 60; i++)
+  for (int i = 0; i < N_PIXELS; i++)
   {
     fft_bins[i] = 0.0;
   }
@@ -109,13 +109,25 @@ void fft_stuff(float * data, size_t size)
   double fft_data[max_size];
   memcpy(fft_data, vReal + 2, max_size*sizeof(double));
 
-  for (int i = 0; i < max_size; i++) {
-    int bin = lroundf(60.0f * i / max_size);
-    fft_bins[bin] += fft_data[i];
+  if (N_PIXELS > max_size)
+  {
+    for (int i = 0; i < N_PIXELS; i++) {
+      int bin = lroundf(1.0f * max_size * i / N_PIXELS);
+      fft_bins[i] += fft_data[bin];
+    }    
+  }
+  else
+  {
+    for (int i = 0; i < max_size; i++) {
+      int bin = lroundf(1.0f * N_PIXELS * i / max_size);
+      fft_bins[bin] += fft_data[i];
+    }
   }
 
+  copy_to_fft(fft_bins);
+
 #if 0
-  for (int i = 0; i < 60; i++)
+  for (int i = 0; i < N_PIXELS; i++)
   {
     Serial.printf("%2.1f ", fft_bins[i]);
   }

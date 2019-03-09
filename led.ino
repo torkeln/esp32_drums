@@ -10,6 +10,12 @@ enum MODE {
 
 enum MODE mode = MODE_RUN;
 
+double fft_bins_copy[N_PIXELS];
+
+void copy_to_fft(double * src) {
+  memcpy(fft_bins_copy, src, sizeof(fft_bins_copy));
+}
+
 // This is an array of leds.  One item for each led in your strip.
 CRGB leds[N_PIXELS];
 CRGBPalette16 currentPalette = RainbowColors_p;
@@ -58,22 +64,26 @@ void updateLEDSRunMode(){
   static int led_runner = 0;
   for (int i = 0; i < N_PIXELS; i++) {
     if (i == led_runner 
-      || (i == (led_runner+10)%N_PIXELS)
-      || (i == (led_runner+20)%N_PIXELS)
-      || (i == (led_runner+30)%N_PIXELS)
-      || (i == (led_runner+40)%N_PIXELS)
-      || (i == (led_runner+50)%N_PIXELS)
-      )
+#if MULTI_LED_RUN
+        || (i == (led_runner+20)%N_PIXELS)
+        || (i == (led_runner+30)%N_PIXELS)
+        || (i == (led_runner+40)%N_PIXELS)
+        || (i == (led_runner+50)%N_PIXELS)
+#endif
+        || (i == (led_runner+150)%N_PIXELS)
+      ) {
       leds[i] = ColorFromPalette( currentPalette, 255 * i / N_PIXELS, 255, currentBlending);
-    else
+    }
+    else {
       leds[i] = CRGB::Black;
+    }
   }  
   led_runner = (led_runner + 1) % N_PIXELS;
 }
 
 void updateLEDSFFTMode(){
   for (int i = 0; i < N_PIXELS; i++) {
-    leds[i] = ColorFromPalette(currentPalette, 255 * i / N_PIXELS, min((int)(200 * fft_bins[i]),255), currentBlending);
+    leds[i] = ColorFromPalette(currentPalette, 255 * i / N_PIXELS, min((int)(200 * fft_bins_copy[i]),255), currentBlending);
   }  
 }
 
@@ -98,7 +108,7 @@ void updateLEDS()
 void led_loop(void *)
 {
   TickType_t xLastWakeTime;
-  const TickType_t xFrequency = pdMS_TO_TICKS(50);
+  const TickType_t xFrequency = pdMS_TO_TICKS(LED_UPDATE_EVERY_MS);
   
   FastLED.addLeds<WS2811, LED_PIN, RGB>(leds, N_PIXELS);
   xLastWakeTime = xTaskGetTickCount ();
@@ -114,7 +124,7 @@ void led_init() {
         "LED", /* Name of the task */
         10000,  /* Stack size in words */
         NULL,  /* Task input parameter */
-        4,  /* Priority of the task */
+        3,  /* Priority of the task */
         NULL,  /* Task handle. */
         1); /* Core where the task should run */  
 }
