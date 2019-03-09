@@ -112,7 +112,7 @@ void fft_stuff(float * data, size_t size)
   if (N_PIXELS > max_size)
   {
     for (int i = 0; i < N_PIXELS; i++) {
-      int bin = lroundf(1.0f * max_size * i / N_PIXELS);
+      int bin = max_size * i / N_PIXELS;
       fft_bins[i] += fft_data[bin];
     }    
   }
