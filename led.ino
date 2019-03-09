@@ -49,20 +49,6 @@ void updateLEDS()
   float normalized_level = fmax(fmin(rms_fast_t.rms * 2.0f, 1.0f), 0.0f);
   float level = rms_multiplier * (normalized_level - rms_threshold);
   float inter = clamp(level, 1.0f, 0.0f);
-  Serial.print(1.0f);
-  Serial.print(" ");
-  Serial.print(rms_fast_t.rms*2);
-  Serial.print(" ");
-  Serial.print(level);
-  Serial.print(" ");
-  Serial.println(inter);
-
-#ifdef PRINT_LEVEL_LOG
-  Serial.print(rms_fast_t.rms);
-  Serial.print(" ");
-  Serial.print(inter);
-  Serial.println();
-#endif
   int height = (int)(inter * TOP);
 
   for (i = 0; i < N_PIXELS; i++) {
@@ -75,7 +61,13 @@ void updateLEDS()
     }
     else if (mode == MODE_RUN)
     {
-      if (i == led_runner)
+      if (i == led_runner 
+        || (i == (led_runner+10)%N_PIXELS)
+        || (i == (led_runner+20)%N_PIXELS)
+        || (i == (led_runner+30)%N_PIXELS)
+        || (i == (led_runner+40)%N_PIXELS)
+        || (i == (led_runner+50)%N_PIXELS)
+        )
         leds[i] = ColorFromPalette( currentPalette, 255 * i / N_PIXELS, 255, currentBlending);
       else
         leds[i] = CRGB::Black;
@@ -92,10 +84,14 @@ void updateLEDS()
 
 void led_loop(void *)
 {
+  TickType_t xLastWakeTime;
+  const TickType_t xFrequency = pdMS_TO_TICKS(50);
+  
   FastLED.addLeds<WS2811, LED_PIN, RGB>(leds, N_PIXELS);
+  xLastWakeTime = xTaskGetTickCount ();
   for (;;) {
     updateLEDS();
-    vTaskDelay(50);
+    vTaskDelayUntil( &xLastWakeTime, xFrequency );
   }
 }
 
