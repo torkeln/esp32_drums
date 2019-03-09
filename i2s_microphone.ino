@@ -2,9 +2,9 @@
 #include <limits.h>
 #include "filter1.h"
 #include <arduinoFFT.h>
+#include "config.h"
 
 const i2s_port_t I2S_PORT = I2S_NUM_0;
-const int BLOCK_SIZE = 1024;
 
 filter1Type * f1;
 arduinoFFT FFT = arduinoFFT();
@@ -15,16 +15,14 @@ struct rms_state {
   float sum_squares;
 };
 
-#define INITIAL 0.1
-#define SAMPLES (80)
-struct rms_state rms_fast_t = {INITIAL, SAMPLES, 1UL * SAMPLES * INITIAL * INITIAL};
+struct rms_state rms_fast_t = {RMS_INITIAL, RMS_SAMPLES, 1UL * RMS_SAMPLES * RMS_INITIAL * RMS_INITIAL};
 
-int32_t samples[BLOCK_SIZE];
-float samples_mirror[BLOCK_SIZE];
-float samples_filtered[BLOCK_SIZE];
+int32_t samples[I2S_BLOCK_SIZE];
+float samples_mirror[I2S_BLOCK_SIZE];
+float samples_filtered[I2S_BLOCK_SIZE];
 
-double vReal[BLOCK_SIZE];
-double vImag[BLOCK_SIZE];
+double vReal[I2S_BLOCK_SIZE];
+double vImag[I2S_BLOCK_SIZE];
 double fft_bins[60];
 
 void i2s_init() {
@@ -52,7 +50,7 @@ void i2s_setup() {
     .communication_format = i2s_comm_format_t(I2S_COMM_FORMAT_I2S | I2S_COMM_FORMAT_I2S_LSB),
     .intr_alloc_flags = ESP_INTR_FLAG_LEVEL1,     // Interrupt level 1
     .dma_buf_count = 4,                           // number of buffers
-    .dma_buf_len = BLOCK_SIZE                     // samples per buffer
+    .dma_buf_len = I2S_BLOCK_SIZE                     // samples per buffer
   };
 
   // The pin config as per the setup
@@ -132,11 +130,11 @@ void i2s_loop(void *) {
 
     int status = i2s_read(I2S_PORT,
                           samples,
-                          BLOCK_SIZE,     // the doc says bytes, but its elements.
+                          I2S_BLOCK_SIZE,     // the doc says bytes, but its elements.
                           &samples_read,
                           portMAX_DELAY); // no timeout
   
-    if (samples_read != BLOCK_SIZE)
+    if (samples_read != I2S_BLOCK_SIZE)
     {
       Serial.println("Wrong size read");
       continue;

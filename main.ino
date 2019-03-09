@@ -1,15 +1,5 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
-#include <Event.h>
-
-#define MIC_PIN   A2
-
-// Replace the next variables with your SSID/Password combination
-const char* ssid = "SAMBAND";
-const char* password = "AardvarkBadgerHedgehog";
-
-// Add your MQTT Broker IP address, example:
-const char* mqtt_server = "192.168.4.1";
 
 bool use_networking = false;
 

@@ -1,8 +1,6 @@
 #include <FastLED.h>
 
-#define N_PIXELS  60  // Number of pixels you are using
 #define TOP       (N_PIXELS +1)
-#define LED_PIN    12
 
 enum MODE {
   MODE_AUDIO,
