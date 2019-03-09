@@ -1,7 +1,6 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
 #include <Event.h>
-#include <Timer.h>
 
 #define MIC_PIN   A2
 
@@ -12,7 +11,7 @@ const char* password = "AardvarkBadgerHedgehog";
 // Add your MQTT Broker IP address, example:
 const char* mqtt_server = "192.168.4.1";
 
-Timer t;
+bool use_networking = false;
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -20,17 +19,14 @@ PubSubClient client(espClient);
 void setup() {
   delay(500);
   Serial.begin(2000000);
-  i2s_setup();
-  led_setup();
-  t.every(50, updateLEDS, NULL);
-  //t.every(10, printData, NULL);
+  led_init();
 
   setup_wifi();
   client.setServer(mqtt_server, 1883);
   client.setCallback(mqtt_callback);
-}
 
-bool use_networking = false;
+  i2s_init();
+}
 
 void setup_wifi() {
   static int fail_counter = 0;
@@ -69,7 +65,6 @@ void setup_wifi() {
   }
 }
 
-
 void reconnect() {
   // Loop until we're reconnected
   while (!client.connected()) {
@@ -92,11 +87,7 @@ void reconnect() {
   }
 }
 
-
 void loop() {
-  t.update();
-  i2s_loop();
-
   if (use_networking)
   {
     if (!client.connected()) {

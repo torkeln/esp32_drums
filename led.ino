@@ -38,7 +38,8 @@ float clamp(float val, float maxval, float minval)
 {
   return fmax(fmin(val, maxval), minval);
 }
-void updateLEDS(void * context)
+
+void updateLEDS()
 {
   static int led_runner = 0;
   int i;
@@ -89,7 +90,22 @@ void updateLEDS(void * context)
   led_runner = (led_runner + 1) % N_PIXELS;
 }
 
-void led_setup()
+void led_loop(void *)
 {
   FastLED.addLeds<WS2811, LED_PIN, RGB>(leds, N_PIXELS);
+  for (;;) {
+    updateLEDS();
+    vTaskDelay(50);
+  }
+}
+
+void led_init() {
+  xTaskCreatePinnedToCore(
+        led_loop, /* Function to implement the task */
+        "LED", /* Name of the task */
+        10000,  /* Stack size in words */
+        NULL,  /* Task input parameter */
+        3 ,  /* Priority of the task */
+        NULL,  /* Task handle. */
+        0); /* Core where the task should run */  
 }
