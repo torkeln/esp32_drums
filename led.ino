@@ -39,10 +39,7 @@ float clamp(float val, float maxval, float minval)
   return fmax(fmin(val, maxval), minval);
 }
 
-void updateLEDS()
-{
-  static int led_runner = 0;
-  int i;
+void updateLEDSAudioMode(){
   const float threshold = 0.5f;
   const float inv_threshold = (1.0f - threshold);
   // Calculate bar height based on dynamic min/max levels (fixed point):
@@ -51,35 +48,53 @@ void updateLEDS()
   float inter = clamp(level, 1.0f, 0.0f);
   int height = (int)(inter * TOP);
 
-  for (i = 0; i < N_PIXELS; i++) {
-    if (mode == MODE_AUDIO)
-    {
-      if (i >= height)
-        leds[i] = CRGB::Black;
-      else
-        leds[i] = ColorFromPalette( currentPalette, 255 * i / N_PIXELS, 255, currentBlending);
-    }
-    else if (mode == MODE_RUN)
-    {
-      if (i == led_runner 
-        || (i == (led_runner+10)%N_PIXELS)
-        || (i == (led_runner+20)%N_PIXELS)
-        || (i == (led_runner+30)%N_PIXELS)
-        || (i == (led_runner+40)%N_PIXELS)
-        || (i == (led_runner+50)%N_PIXELS)
-        )
-        leds[i] = ColorFromPalette( currentPalette, 255 * i / N_PIXELS, 255, currentBlending);
-      else
-        leds[i] = CRGB::Black;
-    }
-    else if (mode == MODE_FFT)
-    {
-      leds[i] = ColorFromPalette(currentPalette, 255 * i / N_PIXELS, min((int)(200 * fft_bins[i]),255), currentBlending);
-    }
+  for (int i = 0; i < N_PIXELS; i++) {
+    if (i >= height)
+      leds[i] = CRGB::Black;
+    else
+      leds[i] = ColorFromPalette( currentPalette, 255 * i / N_PIXELS, 255, currentBlending);
+  }  
+}
+
+void updateLEDSRunMode(){
+  static int led_runner = 0;
+  for (int i = 0; i < N_PIXELS; i++) {
+    if (i == led_runner 
+      || (i == (led_runner+10)%N_PIXELS)
+      || (i == (led_runner+20)%N_PIXELS)
+      || (i == (led_runner+30)%N_PIXELS)
+      || (i == (led_runner+40)%N_PIXELS)
+      || (i == (led_runner+50)%N_PIXELS)
+      )
+      leds[i] = ColorFromPalette( currentPalette, 255 * i / N_PIXELS, 255, currentBlending);
+    else
+      leds[i] = CRGB::Black;
+  }  
+  led_runner = (led_runner + 1) % N_PIXELS;
+}
+
+void updateLEDSFFTMode(){
+  for (int i = 0; i < N_PIXELS; i++) {
+    leds[i] = ColorFromPalette(currentPalette, 255 * i / N_PIXELS, min((int)(200 * fft_bins[i]),255), currentBlending);
+  }  
+}
+
+void updateLEDS()
+{
+  if (mode == MODE_AUDIO)
+  {
+    updateLEDSAudioMode();
+  }
+  else if (mode == MODE_RUN)
+  {
+    updateLEDSRunMode();
+  }
+  else if (mode == MODE_FFT)
+  {
+    updateLEDSFFTMode();
   }
 
   FastLED.show();
-  led_runner = (led_runner + 1) % N_PIXELS;
 }
 
 void led_loop(void *)
@@ -101,7 +116,7 @@ void led_init() {
         "LED", /* Name of the task */
         10000,  /* Stack size in words */
         NULL,  /* Task input parameter */
-        3 ,  /* Priority of the task */
+        4,  /* Priority of the task */
         NULL,  /* Task handle. */
         1); /* Core where the task should run */  
 }
