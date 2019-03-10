@@ -12,9 +12,7 @@ void setup() {
   led_init();
 
   setup_wifi();
-  client.setServer(mqtt_server, 1883);
-  client.setCallback(mqtt_callback);
-
+  setup_mqtt();
   i2s_init();
 }
 
@@ -67,6 +65,7 @@ void reconnect() {
       // Subscribe
       client.subscribe("led/color");
       client.subscribe("led/mode");
+      client.subscribe("led/threshold");
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());

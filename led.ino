@@ -36,7 +36,7 @@ DEFINE_GRADIENT_PALETTE( red_gp ) {
 
 
 float rms_multiplier = 2.0f;
-float rms_threshold = 0.4f;
+float input_threshold = 0.4f;
 
 float clamp(float val, float maxval, float minval)
 {
@@ -44,12 +44,9 @@ float clamp(float val, float maxval, float minval)
 }
 
 void updateLEDSAudioMode(){
-  const float threshold = 0.5f;
-  const float inv_threshold = (1.0f - threshold);
-  // Calculate bar height based on dynamic min/max levels (fixed point):
-  float normalized_level = fmax(fmin(rms_fast_t.rms * 2.0f, 1.0f), 0.0f);
-  float level = rms_multiplier * (normalized_level - rms_threshold);
+  float level = fmax(rms_fast_t.rms * 2.0f - input_threshold, 0.0f)/(1.0f-input_threshold);
   float inter = clamp(level, 1.0f, 0.0f);
+
   int height = (int)(inter * TOP);
 
   for (int i = 0; i < N_PIXELS; i++) {
@@ -77,7 +74,7 @@ void updateLEDSRunMode(){
     else {
       leds[i] = CRGB::Black;
     }
-  }  
+  }
   led_runner = (led_runner + 1) % N_PIXELS;
 }
 

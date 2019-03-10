@@ -1,3 +1,14 @@
+void mqtt_publish(char* topic, String message){
+  char test[100];
+  message.toCharArray(test, 100);
+  client.publish(topic,test);
+}
+
+void setup_mqtt() {
+  client.setServer(mqtt_server, 1883);
+  client.setCallback(mqtt_callback);
+}
+
 void mqtt_callback(char* topic, byte* message, unsigned int length) {
   Serial.print("Message arrived on topic: ");
   Serial.print(topic);
@@ -76,9 +87,6 @@ void mqtt_callback(char* topic, byte* message, unsigned int length) {
     }
   }
   else if (String(topic) == "led/threshold") {
-    rms_threshold = clamp(messageTemp.toFloat(), 1.0f, 0.0f);
-  }
-  else if (String(topic) == "led/multiplier") {
-    rms_multiplier = clamp(messageTemp.toFloat(), 10.0f, 1.0f);
+    input_threshold = clamp(messageTemp.toFloat(), 1.0f, 0.0f);
   }
 }
