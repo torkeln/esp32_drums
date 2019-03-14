@@ -1,3 +1,27 @@
+void reconnect() {
+  // Loop until we're reconnected
+  while (!client.connected()) {
+    Serial.print("Attempting MQTT connection...");
+    // Attempt to connect
+    char mac[32];
+    WiFi.macAddress().toCharArray(mac, 32);
+    if (client.connect(mac)) {
+      Serial.println("connected");
+      // Subscribe
+      client.subscribe("led/color");
+      client.subscribe("led/mode");
+      client.subscribe("led/threshold");
+      client.subscribe("led/fft_factor");
+    } else {
+      Serial.print("failed, rc=");
+      Serial.print(client.state());
+      Serial.println(" try again in 5 seconds");
+      // Wait 5 seconds before retrying
+      delay(5000);
+    }
+  }
+}
+
 void mqtt_publish(char* topic, String message){
   char test[100];
   message.toCharArray(test, 100);
@@ -88,5 +112,8 @@ void mqtt_callback(char* topic, byte* message, unsigned int length) {
   }
   else if (String(topic) == "led/threshold") {
     input_threshold = clamp(messageTemp.toFloat(), 1.0f, 0.0f);
+  }
+  else if (String(topic) == "led/fft_factor") {
+    fft_factor = clamp(messageTemp.toFloat(), 100.0f, 0.0f);
   }
 }

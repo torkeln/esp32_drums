@@ -11,7 +11,7 @@ enum MODE {
 enum MODE mode = MODE_RUN;
 
 double fft_bins_copy[N_PIXELS];
-
+float fft_factor = 1.0f;
 void copy_to_fft(double * src) {
   memcpy(fft_bins_copy, src, sizeof(fft_bins_copy));
 }
@@ -80,7 +80,7 @@ void updateLEDSRunMode(){
 
 void updateLEDSFFTMode(){
   for (int i = 0; i < N_PIXELS; i++) {
-    leds[i] = ColorFromPalette(currentPalette, 255 * i / N_PIXELS, min((int)(200 * fft_bins_copy[i]),255), currentBlending);
+    leds[i] = ColorFromPalette(currentPalette, 255 * i / N_PIXELS, min((int)(N_PIXELS*fft_bins_copy[i]*fft_factor),255), currentBlending);
   }  
 }
 
