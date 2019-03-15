@@ -1,13 +1,13 @@
 /******************************* SOURCE LICENSE *********************************
-Copyright (c) 2018 MicroModeler.
+  Copyright (c) 2018 MicroModeler.
 
-A non-exclusive, nontransferable, perpetual, royalty-free license is granted to the Licensee to 
-use the following Information for academic, non-profit, or government-sponsored research purposes.
-Use of the following Information under this License is restricted to NON-COMMERCIAL PURPOSES ONLY.
-Commercial use of the following Information requires a separately executed written license agreement.
+  A non-exclusive, nontransferable, perpetual, royalty-free license is granted to the Licensee to
+  use the following Information for academic, non-profit, or government-sponsored research purposes.
+  Use of the following Information under this License is restricted to NON-COMMERCIAL PURPOSES ONLY.
+  Commercial use of the following Information requires a separately executed written license agreement.
 
-This Information is distributed WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+  This Information is distributed WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 
 ******************************* END OF LICENSE *********************************/
 
@@ -18,12 +18,12 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
 #include <stdlib.h> // For malloc/free
 #include <string.h> // For memset
 
-float filter1_coefficients[10] = 
+float filter1_coefficients[10] =
 {
-// Scaled for floating point
+  // Scaled for floating point
 
-    0.9962838470041907, -1.9925676940083814, 0.9962838470041907, 1.9947405124091158, -0.9947486108316238,// b0, b1, b2, a1, a2
-    1, -2, 1, 1.997813341671618, -0.9978214525694677// b0, b1, b2, a1, a2
+  0.9962838470041907, -1.9925676940083814, 0.9962838470041907, 1.9947405124091158, -0.9947486108316238,// b0, b1, b2, a1, a2
+  1, -2, 1, 1.997813341671618, -0.9978214525694677// b0, b1, b2, a1, a2
 
 };
 
@@ -40,27 +40,27 @@ void filter1_destroy( filter1Type *pObject )
   free( pObject );
 }
 
- void filter1_init( filter1Type * pThis )
+void filter1_init( filter1Type * pThis )
 {
   filter1_reset( pThis );
 
 }
 
- void filter1_reset( filter1Type * pThis )
+void filter1_reset( filter1Type * pThis )
 {
   memset( &pThis->state, 0, sizeof( pThis->state ) ); // Reset state to 0
   pThis->output = 0;                  // Reset output
 
 }
 
- int filter1_filterBlock( filter1Type * pThis, float * pInput, float * pOutput, unsigned int count )
+int filter1_filterBlock( filter1Type * pThis, float * pInput, float * pOutput, unsigned int count )
 {
-  filter1_executionState executionState;          // The executionState structure holds call data, minimizing stack reads and writes 
-  if( ! count ) return 0;                         // If there are no input samples, return immediately
+  filter1_executionState executionState;          // The executionState structure holds call data, minimizing stack reads and writes
+  if ( ! count ) return 0;                        // If there are no input samples, return immediately
   executionState.pInput = pInput;                 // Pointers to the input and output buffers that each call to filterBiquad() will use
   executionState.pOutput = pOutput;               // - pInput and pOutput can be equal, allowing reuse of the same memory.
   executionState.count = count;                   // The number of samples to be processed
-  executionState.pState = pThis->state;                   // Pointer to the biquad's internal state and coefficients. 
+  executionState.pState = pThis->state;                   // Pointer to the biquad's internal state and coefficients.
   executionState.pCoefficients = filter1_coefficients;    // Each call to filterBiquad() will advance pState and pCoefficients to the next biquad
 
   // The 1st call to filter1_filterBiquad() reads from the caller supplied input buffer and writes to the output buffer.
@@ -71,12 +71,12 @@ void filter1_destroy( filter1Type *pObject )
 
   filter1_filterBiquad( &executionState );    // Run biquad #1
 
-  // At this point, the caller-supplied output buffer will contain the filtered samples and the input buffer will contain the unmodified input samples.  
+  // At this point, the caller-supplied output buffer will contain the filtered samples and the input buffer will contain the unmodified input samples.
   return count;   // Return the number of samples processed, the same as the number of input samples
 
 }
 
- void filter1_filterBiquad( filter1_executionState * pExecState )
+void filter1_filterBiquad( filter1_executionState * pExecState )
 {
   // Read state variables
   float w0, x0;
@@ -97,18 +97,18 @@ void filter1_destroy( filter1Type *pObject )
   float accumulator;
 
   // Loop for all samples in the input buffer
-  while( count-- )
+  while ( count-- )
   {
     // Read input sample
     x0 = *(pInput++);
-  
+
     // Run feedback part of filter
     accumulator  = w2 * a2;
     accumulator += w1 * a1;
     accumulator += x0 ;
 
     w0 = accumulator ;
-  
+
     // Run feedforward part of filter
     accumulator  = w0 * b0;
     accumulator += w1 * b1;

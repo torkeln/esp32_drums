@@ -27,13 +27,13 @@ double fft_bins[N_PIXELS];
 
 void i2s_init() {
   xTaskCreatePinnedToCore(
-        i2s_loop, /* Function to implement the task */
-        "I2S", /* Name of the task */
-        10000,  /* Stack size in words */
-        NULL,  /* Task input parameter */
-        4 ,  /* Priority of the task */
-        NULL,  /* Task handle. */
-        0); /* Core where the task should run */  
+    i2s_loop, /* Function to implement the task */
+    "I2S", /* Name of the task */
+    10000,  /* Stack size in words */
+    NULL,  /* Task input parameter */
+    4 ,  /* Priority of the task */
+    NULL,  /* Task handle. */
+    0); /* Core where the task should run */
 }
 
 void i2s_setup() {
@@ -107,14 +107,14 @@ void fft_stuff(float * data, size_t size)
 
   const int max_size = size / 4;
   double fft_data[max_size];
-  memcpy(fft_data, vReal + 2, max_size*sizeof(double));
+  memcpy(fft_data, vReal + 2, max_size * sizeof(double));
 
   if (N_PIXELS > max_size)
   {
     for (int i = 0; i < N_PIXELS; i++) {
       int bin = max_size * i / N_PIXELS;
       fft_bins[i] += fft_data[bin];
-    }    
+    }
   }
   else
   {
@@ -137,7 +137,7 @@ void fft_stuff(float * data, size_t size)
 
 void i2s_loop(void *) {
   i2s_setup();
-  for(;;) {
+  for (;;) {
     size_t samples_read = 0;
 
     int status = i2s_read(I2S_PORT,
@@ -145,35 +145,35 @@ void i2s_loop(void *) {
                           I2S_BLOCK_SIZE,     // the doc says bytes, but its elements.
                           &samples_read,
                           portMAX_DELAY); // no timeout
-  
+
     if (samples_read != I2S_BLOCK_SIZE)
     {
       Serial.println("Wrong size read");
       continue;
     }
-  
+
     samples_read /= 4;
     if (samples_read > 0) {
       static float maxenvelope = 0;
-  
+
       float maxval = -2147483648;
       float minval = 2147483648;
       for (int i = 0; i < samples_read; i++) {
         samples_mirror[i] = samples[i] / 3518234624.0f;
       }
-  
+
       filter1_filterBlock( f1, samples_mirror, samples_filtered, samples_read );
       fft_stuff(samples_mirror, samples_read);
-  
-  
+
+
       for (int i = 0; i < samples_read; i++) {
         rms_filter(samples_filtered[i], &rms_fast_t);
         //Serial.println(samples_filtered[i]);
-  
+
         minval = fmin(minval, samples_filtered[i]);
         maxval = fmax(maxval, samples_filtered[i]);
       }
-  
+
       float envelope = (maxval - minval);
       rms_filter(envelope, &rms_fast_t);
     }

@@ -12,6 +12,7 @@ void reconnect() {
       client.subscribe("led/mode");
       client.subscribe("led/threshold");
       client.subscribe("led/fft_factor");
+      client.subscribe("power/off");
     } else {
       Serial.print("failed, rc=");
       Serial.print(client.state());
@@ -22,10 +23,10 @@ void reconnect() {
   }
 }
 
-void mqtt_publish(char* topic, String message){
+void mqtt_publish(char* topic, String message) {
   char test[100];
   message.toCharArray(test, 100);
-  client.publish(topic,test);
+  client.publish(topic, test);
 }
 
 void setup_mqtt() {
@@ -115,5 +116,9 @@ void mqtt_callback(char* topic, byte* message, unsigned int length) {
   }
   else if (String(topic) == "led/fft_factor") {
     fft_factor = clamp(messageTemp.toFloat(), 100.0f, 0.0f);
+  }
+  else if (String(topic) == "power/off") {
+    mode = MODE_OFF;
+    power_off();
   }
 }
