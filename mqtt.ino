@@ -118,7 +118,6 @@ void mqtt_callback(char* topic, byte* message, unsigned int length) {
     fft_factor = clamp(messageTemp.toFloat(), 100.0f, 0.0f);
   }
   else if (String(topic) == "power/off") {
-    mode = MODE_OFF;
     power_off();
   }
 }

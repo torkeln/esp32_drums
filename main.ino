@@ -44,6 +44,8 @@ void setup() {
   delay(500);
   gpio_set_level(GPIO_NUM_21, 1);
 
+  gpio_set_direction(GPIO_NUM_33, GPIO_MODE_INPUT);
+  gpio_pullup_en(GPIO_NUM_33);
   led_init();
 
   setup_wifi();
@@ -52,6 +54,7 @@ void setup() {
 }
 
 void power_off(void) {
+  mode = MODE_OFF;
   delay(500);
   esp_sleep_enable_ext0_wakeup(GPIO_NUM_33, 0);
   gpio_pullup_en(GPIO_NUM_33);
@@ -107,5 +110,8 @@ void loop() {
       reconnect();
     }
     client.loop();
+  }
+  if (gpio_get_level(GPIO_NUM_33) == 0) {
+    power_off();
   }
 }

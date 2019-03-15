@@ -37,7 +37,6 @@ void i2s_init() {
 }
 
 void i2s_setup() {
-  //Serial.begin(2000000);
   Serial.println("Configuring I2S...");
   esp_err_t err;
 
