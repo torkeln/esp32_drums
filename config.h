@@ -47,5 +47,7 @@ void setup_mqtt(void);
 void mqtt_loop(void);
 void i2s_init(void);
 float clamp(float val, float maxval, float minval);
+void i2s_enable_update(bool en);
+void led_enable_update(bool en);
 
 #endif /* CONFIG_H */

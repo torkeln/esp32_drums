@@ -20,6 +20,8 @@ TBlendType    currentBlending = LINEARBLEND;
 float rms_multiplier = 2.0f;
 float input_threshold = 0.4f;
 
+static TaskHandle_t xLedTaskHandle;
+
 float clamp(float val, float maxval, float minval)
 {
   return fmax(fmin(val, maxval), minval);
@@ -93,6 +95,18 @@ void updateLEDS()
   FastLED.show();
 }
 
+void led_enable_update(bool en)
+{
+  if (en) 
+  {
+    vTaskResume(xLedTaskHandle);
+  }
+  else
+  {
+    vTaskSuspend(xLedTaskHandle);
+  }
+}
+
 void led_loop(void *)
 {
   TickType_t xLastWakeTime;
@@ -113,6 +127,6 @@ void led_init() {
     10000,  /* Stack size in words */
     NULL,  /* Task input parameter */
     3,  /* Priority of the task */
-    NULL,  /* Task handle. */
+    &xLedTaskHandle,  /* Task handle. */
     1); /* Core where the task should run */
 }

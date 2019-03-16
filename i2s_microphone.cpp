@@ -20,6 +20,8 @@ double vReal[I2S_BLOCK_SIZE];
 double vImag[I2S_BLOCK_SIZE];
 double fft_bins[N_PIXELS];
 
+static TaskHandle_t xI2STaskHandle;
+
 void i2s_setup() {
   Serial.println("Configuring I2S...");
   esp_err_t err;
@@ -163,6 +165,18 @@ void i2s_loop(void *) {
   }
 }
 
+void i2s_enable_update(bool en)
+{
+  if (en) 
+  {
+    vTaskResume(xI2STaskHandle);
+  }
+  else
+  {
+    vTaskSuspend(xI2STaskHandle);
+  }
+}
+
 void i2s_init() {
   xTaskCreatePinnedToCore(
     i2s_loop, /* Function to implement the task */
@@ -170,7 +184,7 @@ void i2s_init() {
     10000,  /* Stack size in words */
     NULL,  /* Task input parameter */
     4 ,  /* Priority of the task */
-    NULL,  /* Task handle. */
+    &xI2STaskHandle,  /* Task handle. */
     0); /* Core where the task should run */
 }
 
