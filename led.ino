@@ -2,13 +2,6 @@
 
 #define TOP       (N_PIXELS +1)
 
-enum MODE {
-  MODE_AUDIO,
-  MODE_RUN,
-  MODE_FFT,
-  MODE_OFF
-};
-
 enum MODE mode = MODE_RUN;
 
 double fft_bins_copy[N_PIXELS];
@@ -74,7 +67,7 @@ void updateLEDSRunMode() {
         || (i == (led_runner + 40) % N_PIXELS)
         || (i == (led_runner + 50) % N_PIXELS)
 #endif
-        || (i == (led_runner + 150) % N_PIXELS)
+        || (i == (led_runner + N_PIXELS/2) % N_PIXELS)
        ) {
       leds[i] = ColorFromPalette( currentPalette, 255 * i / N_PIXELS, 255, currentBlending);
     }

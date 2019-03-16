@@ -1,5 +1,6 @@
 #include <WiFi.h>
 #include <PubSubClient.h>
+#include "config.h"
 
 bool use_networking = false;
 
@@ -37,12 +38,12 @@ void setup() {
   Serial.println("Boot number: " + String(bootCount));
   print_wakeup_reason();
 
-  gpio_set_direction(GPIO_NUM_21, GPIO_MODE_OUTPUT);
-  gpio_set_level(GPIO_NUM_21, 1);
+  gpio_set_direction(GPIO_NUM_13, GPIO_MODE_OUTPUT);
+  gpio_set_level(GPIO_NUM_13, 1);
   delay(500);
-  gpio_set_level(GPIO_NUM_21, 0);
+  gpio_set_level(GPIO_NUM_13, 0);
   delay(500);
-  gpio_set_level(GPIO_NUM_21, 1);
+  gpio_set_level(GPIO_NUM_13, 1);
 
   gpio_set_direction(GPIO_NUM_33, GPIO_MODE_INPUT);
   gpio_pullup_en(GPIO_NUM_33);
