@@ -1,11 +1,5 @@
-#include <WiFi.h>
-#include <PubSubClient.h>
+#include <Arduino.h>
 #include "config.h"
-
-bool use_networking = false;
-
-WiFiClient espClient;
-PubSubClient client(espClient);
 
 #define BUTTON_PIN_BITMASK 0x200000000 // 2^33 in hex
 
@@ -38,13 +32,6 @@ void setup() {
   Serial.println("Boot number: " + String(bootCount));
   print_wakeup_reason();
 
-  gpio_set_direction(GPIO_NUM_13, GPIO_MODE_OUTPUT);
-  gpio_set_level(GPIO_NUM_13, 1);
-  delay(500);
-  gpio_set_level(GPIO_NUM_13, 0);
-  delay(500);
-  gpio_set_level(GPIO_NUM_13, 1);
-
   gpio_set_direction(GPIO_NUM_33, GPIO_MODE_INPUT);
   gpio_pullup_en(GPIO_NUM_33);
   led_init();
@@ -66,52 +53,8 @@ void power_off(void) {
   esp_deep_sleep_start();
 }
 
-void setup_wifi() {
-  static int fail_counter = 0;
-  use_networking = true;
-  delay(10);
-  // We start by connecting to a WiFi network
-  Serial.println();
-  Serial.print("Connecting to ");
-  Serial.println(ssid);
-
-  WiFi.begin(ssid, password);
-
-  while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
-    Serial.print(".");
-    fail_counter++;
-    if (fail_counter > 10)
-    {
-      use_networking = false;
-      break;
-    }
-  }
-
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-
-  if (use_networking)
-  {
-    mode = MODE_RUN;
-  }
-  else
-  {
-    mode = MODE_AUDIO;
-  }
-}
-
-
 void loop() {
-  if (use_networking)
-  {
-    if (!client.connected()) {
-      reconnect();
-    }
-    client.loop();
-  }
+  mqtt_loop();
   if (gpio_get_level(GPIO_NUM_33) == 0) {
     power_off();
   }

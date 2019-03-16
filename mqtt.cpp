@@ -1,3 +1,70 @@
+#include <Arduino.h>
+#include <WiFi.h>
+#include <PubSubClient.h>
+#include "config.h"
+
+bool use_networking = false;
+
+DEFINE_GRADIENT_PALETTE( blue_gp ) {
+  0,     0,  0,  100,
+  255,   100,  100,  255
+};
+DEFINE_GRADIENT_PALETTE( green_gp ) {
+  0,     100,  0,  0,
+  255,   255,  100,  100
+};
+DEFINE_GRADIENT_PALETTE( red_gp ) {
+  0,     0,  100,  0,
+  255,   100,  255,  100
+};
+
+// Replace the next variables with your SSID/Password combination
+const char* ssid = SSID;
+const char* password = PASSWD;
+
+// Add your MQTT Broker IP address, example:
+const char* mqtt_server = MQTT_SERVER;
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+
+void setup_wifi(void) {
+  static int fail_counter = 0;
+  use_networking = true;
+  delay(10);
+  // We start by connecting to a WiFi network
+  Serial.println();
+  Serial.print("Connecting to ");
+  Serial.println(ssid);
+
+  WiFi.begin(ssid, password);
+
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(500);
+    Serial.print(".");
+    fail_counter++;
+    if (fail_counter > 10)
+    {
+      use_networking = false;
+      break;
+    }
+  }
+
+  Serial.println("");
+  Serial.println("WiFi connected");
+  Serial.println("IP address: ");
+  Serial.println(WiFi.localIP());
+
+  if (use_networking)
+  {
+    mode = MODE_RUN;
+  }
+  else
+  {
+    mode = MODE_AUDIO;
+  }
+}
+
 void reconnect() {
   // Loop until we're reconnected
   while (!client.connected()) {
@@ -27,11 +94,6 @@ void mqtt_publish(char* topic, String message) {
   char test[100];
   message.toCharArray(test, 100);
   client.publish(topic, test);
-}
-
-void setup_mqtt() {
-  client.setServer(mqtt_server, 1883);
-  client.setCallback(mqtt_callback);
 }
 
 void mqtt_callback(char* topic, byte* message, unsigned int length) {
@@ -119,5 +181,20 @@ void mqtt_callback(char* topic, byte* message, unsigned int length) {
   }
   else if (String(topic) == "power/off") {
     power_off();
+  }
+}
+
+void setup_mqtt() {
+  client.setServer(mqtt_server, 1883);
+  client.setCallback(mqtt_callback);
+}
+
+void mqtt_loop(void) {
+  if (use_networking)
+  {
+    if (!client.connected()) {
+      reconnect();
+    }
+    client.loop();
   }
 }

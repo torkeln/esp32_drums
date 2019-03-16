@@ -1,4 +1,6 @@
+#include <Arduino.h>
 #include <FastLED.h>
+#include "config.h"
 
 #define TOP       (N_PIXELS +1)
 
@@ -14,20 +16,6 @@ void copy_to_fft(double * src) {
 CRGB leds[N_PIXELS];
 CRGBPalette16 currentPalette = RainbowColors_p;
 TBlendType    currentBlending = LINEARBLEND;
-
-DEFINE_GRADIENT_PALETTE( blue_gp ) {
-  0,     0,  0,  100,
-  255,   100,  100,  255
-};
-DEFINE_GRADIENT_PALETTE( green_gp ) {
-  0,     100,  0,  0,
-  255,   255,  100,  100
-};
-DEFINE_GRADIENT_PALETTE( red_gp ) {
-  0,     0,  100,  0,
-  255,   100,  255,  100
-};
-
 
 float rms_multiplier = 2.0f;
 float input_threshold = 0.4f;

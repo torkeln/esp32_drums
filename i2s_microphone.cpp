@@ -1,3 +1,4 @@
+#include <Arduino.h>
 #include <driver/i2s.h>
 #include <limits.h>
 #include "filter1.h"
@@ -9,12 +10,6 @@ const i2s_port_t I2S_PORT = I2S_NUM_0;
 filter1Type * f1;
 arduinoFFT FFT = arduinoFFT();
 
-struct rms_state {
-  float rms;
-  int nbr_of_samples;
-  float sum_squares;
-};
-
 struct rms_state rms_fast_t = {RMS_INITIAL, RMS_SAMPLES, 1UL * RMS_SAMPLES * RMS_INITIAL * RMS_INITIAL};
 
 int32_t samples[I2S_BLOCK_SIZE];
@@ -24,17 +19,6 @@ float samples_filtered[I2S_BLOCK_SIZE];
 double vReal[I2S_BLOCK_SIZE];
 double vImag[I2S_BLOCK_SIZE];
 double fft_bins[N_PIXELS];
-
-void i2s_init() {
-  xTaskCreatePinnedToCore(
-    i2s_loop, /* Function to implement the task */
-    "I2S", /* Name of the task */
-    10000,  /* Stack size in words */
-    NULL,  /* Task input parameter */
-    4 ,  /* Priority of the task */
-    NULL,  /* Task handle. */
-    0); /* Core where the task should run */
-}
 
 void i2s_setup() {
   Serial.println("Configuring I2S...");
@@ -177,6 +161,17 @@ void i2s_loop(void *) {
       rms_filter(envelope, &rms_fast_t);
     }
   }
+}
+
+void i2s_init() {
+  xTaskCreatePinnedToCore(
+    i2s_loop, /* Function to implement the task */
+    "I2S", /* Name of the task */
+    10000,  /* Stack size in words */
+    NULL,  /* Task input parameter */
+    4 ,  /* Priority of the task */
+    NULL,  /* Task handle. */
+    0); /* Core where the task should run */
 }
 
 // actually we would need to call `i2s_driver_uninstall(I2S_PORT)` upon exit.

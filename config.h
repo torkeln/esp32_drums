@@ -1,6 +1,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include <FastLED.h>
+
 #define CONFIG_FREERTOS_USE_TICKLESS_IDLE (1)
 
 const int N_PIXELS = 150;  // Number of pixels you are using
@@ -10,12 +12,9 @@ const int RMS_SAMPLES = 80;
 const int LED_PIN = 12;
 #define LED_UPDATE_EVERY_MS (10)
 
-// Replace the next variables with your SSID/Password combination
-const char* ssid = "SAMBAND";
-const char* password = "AardvarkBadgerHedgehog";
-
-// Add your MQTT Broker IP address, example:
-const char* mqtt_server = "192.168.4.1";
+#define SSID "SAMBAND"
+#define PASSWD "AardvarkBadgerHedgehog"
+#define MQTT_SERVER "192.168.4.1"
 
 enum MODE {
   MODE_AUDIO,
@@ -25,5 +24,28 @@ enum MODE {
 };
 
 extern enum MODE mode;
+
+void copy_to_fft(double * src);
+
+struct rms_state {
+  float rms;
+  int nbr_of_samples;
+  float sum_squares;
+};
+
+extern struct rms_state rms_fast_t;
+
+extern CRGBPalette16 currentPalette;
+extern float input_threshold;
+extern float fft_factor;
+
+//extern TBlendType    currentBlending;
+void led_init();
+void setup_wifi(void);
+void power_off(void);
+void setup_mqtt(void);
+void mqtt_loop(void);
+void i2s_init(void);
+float clamp(float val, float maxval, float minval);
 
 #endif /* CONFIG_H */
