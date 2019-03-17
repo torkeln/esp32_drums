@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include "esp_wifi.h"
+#include "esp_sleep.h"
 #include "config.h"
 
 #define BUTTON_PIN_BITMASK 0x200000000 // 2^33 in hex
@@ -51,7 +52,8 @@ void power_off(void) {
   gpio_hold_en(GPIO_NUM_12);
   //gpio_deep_sleep_hold_en(GPIO_NUM_12);
   esp_wifi_stop();
-  esp_bt_controller_disable();
+  //esp_bt_controller_disable();
+  //esp_bluedroid_disable();
   Serial.println("Going to sleep now...");
   esp_deep_sleep_start();
 }
