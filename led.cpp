@@ -4,7 +4,7 @@
 
 #define TOP       (N_PIXELS +1)
 
-enum MODE mode = MODE_RUN;
+enum MODE mode = MODE_PULSE;
 
 double fft_bins_copy[N_PIXELS];
 float fft_factor = 1.0f;
@@ -68,6 +68,19 @@ void updateLEDSRunMode() {
   led_runner = (led_runner + 1) % N_PIXELS;
 }
 
+void updateLEDSPulseMode() {
+  static int led_runner = 0;
+  static int direction = 1;
+  for (int i = 0; i < N_PIXELS; i++) {
+    leds[i] = ColorFromPalette( currentPalette, 255 * i / N_PIXELS, led_runner, currentBlending);
+  }
+  led_runner = (led_runner + direction);
+  if (led_runner == 100)
+    direction = -1;
+  else if (led_runner == 0)
+    direction = 1;
+}
+
 void updateLEDSFFTMode() {
   for (int i = 0; i < N_PIXELS; i++) {
     leds[i] = ColorFromPalette(currentPalette, 255 * i / N_PIXELS, min((int)(N_PIXELS * fft_bins_copy[i] * fft_factor), 255), currentBlending);
@@ -91,6 +104,10 @@ void updateLEDS()
   else if (mode == MODE_OFF)
   {
     updateLEDSOffMode();
+  }
+  else if (mode == MODE_PULSE)
+  {
+    updateLEDSPulseMode();
   }
   FastLED.show();
 }

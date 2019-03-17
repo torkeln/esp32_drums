@@ -20,7 +20,8 @@ enum MODE {
   MODE_AUDIO,
   MODE_RUN,
   MODE_FFT,
-  MODE_OFF
+  MODE_OFF,
+  MODE_PULSE
 };
 
 extern enum MODE mode;
