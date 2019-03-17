@@ -240,19 +240,31 @@ void mqtt_callback(char* topic, byte* message, unsigned int length) {
   }
 }
 
-void setup_mqtt() {
+void mqtt_loop(void *) {
+  setup_wifi();
+
   client.setServer(mqtt_server, 1883);
   client.setCallback(mqtt_callback);
+
+  for (;;) {
+    if (use_networking)
+    {
+      if (!client.connected()) {
+        reconnect();
+      }
+      client.loop();
+    }
+    ArduinoOTA.handle();
+  }
 }
 
-
-void mqtt_loop(void) {
-  if (use_networking)
-  {
-    if (!client.connected()) {
-      reconnect();
-    }
-    client.loop();
-  }
-  ArduinoOTA.handle();
+void setup_mqtt() {
+  xTaskCreatePinnedToCore(
+    mqtt_loop, /* Function to implement the task */
+    "MQTT", /* Name of the task */
+    10000,  /* Stack size in words */
+    NULL,  /* Task input parameter */
+    3 ,  /* Priority of the task */
+    NULL,  /* Task handle. */
+    1); /* Core where the task should run */
 }

@@ -37,8 +37,6 @@ void setup() {
   gpio_set_direction(GPIO_NUM_33, GPIO_MODE_INPUT);
   gpio_pullup_en(GPIO_NUM_33);
   led_init();
-
-  setup_wifi();
   setup_mqtt();
   i2s_init();
 }
@@ -59,7 +57,6 @@ void power_off(void) {
 }
 
 void loop() {
-  mqtt_loop();
   if (gpio_get_level(GPIO_NUM_33) == 0) {
     power_off();
   }
