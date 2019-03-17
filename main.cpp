@@ -60,4 +60,5 @@ void loop() {
   if (gpio_get_level(GPIO_NUM_33) == 0) {
     power_off();
   }
+  vTaskDelay(10);
 }

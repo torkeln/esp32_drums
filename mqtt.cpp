@@ -100,19 +100,21 @@ void setup_wifi(void) {
     if (fail_counter > 10)
     {
       use_networking = false;
+      Serial.println("");
+      Serial.println("Failed to connect. Don't use network.");
       break;
     }
   }
 
-  Serial.println("");
-  Serial.println("WiFi connected");
-  Serial.println("IP address: ");
-  Serial.println(WiFi.localIP());
-
-  setup_ota();
-
   if (use_networking)
   {
+    Serial.println("");
+    Serial.println("WiFi connected");
+    Serial.println("IP address: ");
+    Serial.println(WiFi.localIP());
+
+    setup_ota();
+
     mode = MODE_RUN;
   }
   else
@@ -255,6 +257,7 @@ void mqtt_loop(void *) {
       client.loop();
     }
     ArduinoOTA.handle();
+    vTaskDelay(10);
   }
 }
 
